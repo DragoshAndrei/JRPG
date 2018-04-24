@@ -3,6 +3,8 @@
 public class MapLogic : MonoBehaviour
 {
 
+    public CharacterStats toHit;
+
     public enum Directon
     {
         Up,
@@ -40,28 +42,74 @@ public class MapLogic : MonoBehaviour
         Debug.Log("Moving things in the Matrix");
         switch (direction)
         {
-            case Directon.Up:
+            case Directon.Right:
                 mapMatrix[stats.length, stats.width] = 0;
                 mapMatrix[stats.length, stats.width + 1] = stats.creatureID;
                 stats.width += 1;
                 break;
-            case Directon.Down:
+            case Directon.Left:
                 mapMatrix[stats.length, stats.width] = 0;
                 mapMatrix[stats.length, stats.width - 1] = stats.creatureID;
                 stats.width -= 1;
                 break;
-            case Directon.Left:
-                mapMatrix[stats.length, stats.width] = 0;
-                mapMatrix[stats.length - 1, stats.width] = stats.creatureID;
-                stats.length -= 1;
-                break;
-            case Directon.Right:
+            case Directon.Down:
                 mapMatrix[stats.length, stats.width] = 0;
                 mapMatrix[stats.length + 1, stats.width] = stats.creatureID;
                 stats.length += 1;
                 break;
+            case Directon.Up:
+                mapMatrix[stats.length, stats.width] = 0;
+                mapMatrix[stats.length - 1, stats.width] = stats.creatureID;
+                stats.length -= 1;
+                break;
         }
         PrintMatrix();
+    }
+
+    public void AttackObject(CharacterStats attacker)
+    {
+        Debug.Log("Hp before attack: " + toHit.healthPoints);
+        toHit.healthPoints -= attacker.damage;
+        toHit.GetComponent<AddHPBar>().UpdateHPText(toHit.healthPoints.ToString());
+        if (toHit.healthPoints <= 0)
+        {
+            Debug.Log("Enemy dead!");
+            Destroy(toHit.gameObject);
+        }
+        Debug.Log("Hp after attack: " + toHit.healthPoints);
+    }
+
+    public bool CheckValidMove(CharacterStats stats, Directon direction)
+    {
+        bool valid = false;
+        switch (direction)
+        {
+            case Directon.Up:
+                if(stats.length > 0 && mapMatrix[stats.length -1 ,stats.width] == 0)
+                {
+                    valid = true;
+                }
+                break;
+            case Directon.Down:
+                if (stats.length < 2 && mapMatrix[stats.length + 1, stats.width] == 0)
+                {
+                    valid = true;
+                }
+                break;
+            case Directon.Left:
+                if (stats.width > 0 && mapMatrix[stats.length, stats.width - 1] == 0)
+                {
+                    valid = true;
+                }
+                break;
+            case Directon.Right:
+                if (stats.width < 5 && mapMatrix[stats.length, stats.width + 1] == 0)
+                {
+                    valid = true;
+                }
+                break;
+        }
+        return valid;
     }
 
     private void PrintMatrix()
